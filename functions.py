@@ -3,6 +3,13 @@ from pathlib import Path
 import argparse
 from tempfile import NamedTemporaryFile
 from shlex import split
+import sys
+
+def get_null():
+    match sys.platform:
+        case "linux": return "/dev/null"
+        case _: return "NUL"
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -33,24 +40,24 @@ def assign_codec(extension):
                 "video codec": "libx264",
                 "audio codec": "aac",
                       },
-            ".webm": {
-                "video codec": "libvpx-vp9",
-                "audio codec": "libopus",
-                      }
-              }
+                ".webm": {
+                    "video codec": "libvpx-vp9",
+                    "audio codec": "libopus",
+                          }
+                  }
 
-    video_codec = codecs[extension]["video codec"]
-    audio_codec = codecs[extension]["audio codec"]
+        video_codec = codecs[extension]["video codec"]
+        audio_codec = codecs[extension]["audio codec"]
 
-    return str(video_codec), str(audio_codec)
+        return str(video_codec), str(audio_codec)
 
-def compress_video(input_file, output_file, target_size=0.0, audio_bitrate=0.0, fps=0.0, pixels=0.0):
+    def compress_video(input_file, output_file, target_size=0.0, audio_bitrate=0.0, fps=0.0, pixels=0.0):
 
-    video_bitrate = (target_size*(8024))/input_file.duration
-    video_bitrate -= video_bitrate * 0.02
+        video_bitrate = (target_size*(8024))/input_file.duration
+        video_bitrate -= video_bitrate * 0.02
 
-    ffmpeg2passlog = NamedTemporaryFile().name
-    
+        ffmpeg2passlog = NamedTemporaryFile().name
+        null_var = get_null()
     
     if not audio_bitrate:
         audio_bitrate = video_bitrate * 0.3148565881
@@ -65,7 +72,7 @@ def compress_video(input_file, output_file, target_size=0.0, audio_bitrate=0.0, 
 
 
     commands={
-            "pass1": ["ffmpeg", "-y", "-i", str(input_file.filepath), "-c:v", output_file.video_codec, "-b:v", f"{video_bitrate}k", "-maxrate", f"{video_bitrate}k", "-bufsize", f"{video_bitrate*2}k", "-vf", f"fps={fps},scale=-2:{pixels}", "-passlogfile", f"{ffmpeg2passlog}", "-pass", "1", "-an", "-f", "null", "/dev/null"],
+            "pass1": ["ffmpeg", "-y", "-i", str(input_file.filepath), "-c:v", output_file.video_codec, "-b:v", f"{video_bitrate}k", "-maxrate", f"{video_bitrate}k", "-bufsize", f"{video_bitrate*2}k", "-vf", f"fps={fps},scale=-2:{pixels}", "-passlogfile", f"{ffmpeg2passlog}", "-pass", "1", "-an", "-f", "null", null_var],
 
             "pass2": ["ffmpeg", "-y", "-i", str(input_file.filepath), "-c:v", output_file.video_codec, "-b:v", f"{video_bitrate}k", "-maxrate", f"{video_bitrate}k", "-bufsize", f"{video_bitrate*2}k", "-pass", "2", "-vf", f"fps={fps},scale=-2:{pixels}", "-passlogfile", f"{ffmpeg2passlog}", "-c:a", f"{output_file.audio_codec}", "-b:a", f"{audio_bitrate}k", str(output_file.filepath)]
             }
