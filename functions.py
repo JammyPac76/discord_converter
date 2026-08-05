@@ -46,10 +46,10 @@ def assign_codec(extension):
                           }
                   }
 
-        video_codec = codecs[extension]["video codec"]
-        audio_codec = codecs[extension]["audio codec"]
+    video_codec = codecs[extension]["video codec"]
+    audio_codec = codecs[extension]["audio codec"]
 
-        return str(video_codec), str(audio_codec)
+    return str(video_codec), str(audio_codec)
 
     def compress_video(input_file, output_file, target_size=0.0, audio_bitrate=0.0, fps=0.0, pixels=0.0):
 
