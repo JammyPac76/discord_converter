@@ -1,7 +1,8 @@
 # discord_converter
-A script used for compressing videos (specifically made for Discord's pesky filesize limit)
 ---
+A script used for compressing videos (specifically made for Discord's pesky filesize limit)
 # Requirements
+---
 You need to have the following:
 - [FFmpeg](https://github.com/ffmpeg/ffmpeg)
 ## Python modules
