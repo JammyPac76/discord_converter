@@ -2,7 +2,6 @@ import subprocess
 from pathlib import Path
 import argparse
 from tempfile import NamedTemporaryFile
-from shlex import split
 import sys
 
 def get_null():
@@ -10,6 +9,11 @@ def get_null():
         case "linux": return "/dev/null"
         case _: return "NUL"
 
+def download_video(input_link):
+    download_output = f"{NamedTemporaryFile().name}.mp4"
+    subprocess.run(["yt-dlp", "-S", "ext:mp4", input_link, "-o", download_output])
+
+    return download_output
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -32,6 +36,12 @@ def parse_arguments():
             default=9.5
             )
 
+    parser.add_argument(
+            "--download",
+            help="Compress a video directly from it's source (requires yt-dlp).",
+            action='store_true'
+            )
+
     return parser.parse_args()
 
 def assign_codec(extension):
@@ -51,13 +61,13 @@ def assign_codec(extension):
 
     return str(video_codec), str(audio_codec)
 
-    def compress_video(input_file, output_file, target_size=0.0, audio_bitrate=0.0, fps=0.0, pixels=0.0):
+def compress_video(input_file, output_file, target_size=0.0, audio_bitrate=0.0, fps=0.0, pixels=0.0):
 
-        video_bitrate = (target_size*(8024))/input_file.duration
-        video_bitrate -= video_bitrate * 0.02
+    video_bitrate = (target_size*(8024))/input_file.duration
+    video_bitrate -= video_bitrate * 0.02
 
-        ffmpeg2passlog = NamedTemporaryFile().name
-        null_var = get_null()
+    ffmpeg2passlog = NamedTemporaryFile().name
+    null_var = get_null()
     
     if not audio_bitrate:
         audio_bitrate = video_bitrate * 0.3148565881
